@@ -1,0 +1,24 @@
+2025-11-25 21:59:17 - stock_fetcher - INFO - ===== 股票数据获取程序启动 =====
+2025-11-25 21:59:17 - stock_fetcher - INFO - 创建新数据库: stock_data.db
+2025-11-25 21:59:17 - SQLiteDBManager - INFO - 成功连接到数据库: stock_data.db
+2025-11-25 21:59:17 - SQLiteDBManager - INFO - 表 history_k_data 已创建或已存在
+2025-11-25 21:59:17 - stock_fetcher - INFO - 数据库初始化完成
+2025-11-25 21:59:17 - stock_fetcher - INFO - 开始获取股票 sh.600000 历史数据，日期范围: 2017-06-01 至 2025-11-25
+2025-11-25 21:59:33 - stock_fetcher - INFO - 成功获取股票 sh.600000 历史数据，共 2063 条记录
+2025-11-25 21:59:33 - stock_fetcher - INFO - 将数据保存到CSV文件: D:/history_k_data.csv
+2025-11-25 21:59:33 - stock_fetcher - INFO - CSV文件保存成功: D:/history_k_data.csv
+2025-11-25 21:59:33 - stock_fetcher - INFO - 开始将数据写入数据库
+2025-11-25 21:59:33 - SQLiteDBManager - INFO - 成功将DataFrame写入表 history_k_data
+2025-11-25 21:59:33 - stock_fetcher - INFO - 数据写入数据库成功
+2025-11-25 21:59:33 - stock_fetcher - INFO - 数据示例: 
+         date       code     open     high  ...     pbMRQ     psTTM  pcfNcfTTM isST
+0  2017-06-01  sh.600000  12.7800  12.9700  ...  1.037013  2.255830  -3.293370    0
+1  2017-06-02  sh.600000  12.9300  13.0100  ...  1.034605  2.250592  -3.285723    0
+2  2017-06-05  sh.600000  12.7900  12.8800  ...  1.031394  2.243608  -3.275527    0
+3  2017-06-06  sh.600000  12.8000  12.8400  ...  1.027381  2.234878  -3.262781    0
+4  2017-06-07  sh.600000  12.8100  12.9900  ...  1.030591  2.241862  -3.272978    0
+
+[5 rows x 18 columns]
+2025-11-25 21:59:33 - SQLiteDBManager - INFO - 数据库连接已关闭
+2025-11-25 21:59:33 - stock_fetcher - INFO - 数据库连接已关闭
+2025-11-25 21:59:33 - stock_fetcher - INFO - ===== 股票数据获取程序结束 =====
