@@ -1,0 +1,34 @@
+{
+  "last_update": null,
+  "last_update_time": null,
+  "last_update_status": "running",
+  "update_history": [],
+  "current_update": {
+    "start_time": "2025-11-26 14:38:08",
+    "update_type": "incremental",
+    "start_date": "2000-01-01",
+    "end_date": "2025-11-26",
+    "stock_codes": [
+      "sh.000001",
+      "sh.000002",
+      "sh.000003",
+      "sh.000004",
+      "sh.000005",
+      "sh.000006",
+      "sh.000007",
+      "sh.000008",
+      "sh.000009",
+      "sh.000010"
+    ]
+  },
+  "progress": 60.0,
+  "total_stocks": 10,
+  "updated_stocks": 0,
+  "failed_stocks": 6,
+  "update_config": {
+    "update_type": "incremental",
+    "start_date": null,
+    "end_date": null,
+    "stock_codes": null
+  }
+}

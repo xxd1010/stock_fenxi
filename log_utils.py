@@ -67,6 +67,11 @@ class LogUtils:
         # 获取根日志记录器
         root_logger = logging.getLogger()
         
+        # 先移除现有的处理器，避免重复添加
+        if root_logger.handlers:
+            for handler in root_logger.handlers[:]:
+                root_logger.removeHandler(handler)
+        
         # 设置日志级别
         log_level = self.LOG_LEVEL_MAP.get(
             self.config["log_level"].upper(), 

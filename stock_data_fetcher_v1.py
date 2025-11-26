@@ -5,6 +5,7 @@ import pandas as pd
 import baostock as bs
 import datetime
 import sqlite_db_manager as spl
+from concurrent.futures import ThreadPoolExecutor, as_completed
 # 导入日志工具
 from log_utils import setup_logger, get_logger
 # 导入数据校验器
@@ -215,22 +216,9 @@ def fetch_stock_data(code, start_date, end_date, config=None):
     
     for attempt in range(retry_count):
         try:
-            logger.info(f'开始获取股票 {code} 历史数据，日期范围: {start_date} 至 {end_date} (尝试 {attempt+1}/{retry_count})')
+            logger.debug(f'开始获取股票 {code} 历史数据，日期范围: {start_date} 至 {end_date} (尝试 {attempt+1}/{retry_count})')
             
-            # 登陆 baostock 系统
-            lg = bs.login()
-            logger.debug(f'baostock 登录结果: error_code={lg.error_code}, error_msg={lg.error_msg}')
-            
-            if lg.error_code != '0':
-                logger.error(f'baostock 登录失败: {lg.error_msg}')
-                if attempt < retry_count - 1:
-                    logger.info(f'将在 {retry_interval} 秒后重试...')
-                    time.sleep(retry_interval)
-                    continue
-                else:
-                    return None
-            
-            # 获取历史K线数据
+            # 获取历史K线数据（假设已经登录）
             rs = bs.query_history_k_data_plus(code,
                 "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,tradestatus,pctChg,peTTM,pbMRQ,psTTM,pcfNcfTTM,isST",
                 start_date=start_date, end_date=end_date, 
@@ -241,7 +229,7 @@ def fetch_stock_data(code, start_date, end_date, config=None):
             if rs.error_code != '0':
                 logger.error(f'获取股票 {code} 历史数据失败: {rs.error_msg}')
                 if attempt < retry_count - 1:
-                    logger.info(f'将在 {retry_interval} 秒后重试...')
+                    logger.debug(f'将在 {retry_interval} 秒后重试...')
                     time.sleep(retry_interval)
                     continue
                 else:
@@ -254,16 +242,16 @@ def fetch_stock_data(code, start_date, end_date, config=None):
                 data_list.append(rs.get_row_data())
             
             result = pd.DataFrame(data_list, columns=rs.fields)
-            logger.info(f'成功获取股票 {code} 历史数据，共 {len(result)} 条记录')
+            logger.debug(f'成功获取股票 {code} 历史数据，共 {len(result)} 条记录')
             
             # 数据校验
             if validation_enabled:
-                logger.info(f'开始验证股票 {code} 的数据')
+                logger.debug(f'开始验证股票 {code} 的数据')
                 validation_result = validator.validate_dataframe(result, code)
                 
                 if not validation_result['is_valid']:
                     # 尝试清理数据
-                    logger.info(f'股票 {code} 数据验证失败，尝试清理数据')
+                    logger.debug(f'股票 {code} 数据验证失败，尝试清理数据')
                     result = validator.clean_dataframe(result)
                     
                     # 再次验证
@@ -272,21 +260,17 @@ def fetch_stock_data(code, start_date, end_date, config=None):
                         logger.error(f'股票 {code} 数据验证失败，已清理后仍无效，跳过该股票')
                         return None
                 
-                logger.info(f'股票 {code} 数据验证通过')
+                logger.debug(f'股票 {code} 数据验证通过')
             
             return result
         except Exception as e:
             logger.error(f'获取股票 {code} 历史数据时发生异常: {str(e)}')
             if attempt < retry_count - 1:
-                logger.info(f'将在 {retry_interval} 秒后重试...')
+                logger.debug(f'将在 {retry_interval} 秒后重试...')
                 time.sleep(retry_interval)
                 continue
             else:
                 return None
-        finally:
-            # 登出系统
-            bs.logout()
-            logger.debug('baostock 已登出')
 
 
 def read_stock_config(file_path):
@@ -377,6 +361,40 @@ def save_to_csv(df, file_path):
         logger.error(f'保存CSV文件失败: {str(e)}')
 
 
+def process_single_stock(stock_code, stock_name, start_date, end_date, config, csv_dir):
+    """
+    处理单个股票数据的函数，用于多线程执行
+    
+    Args:
+        stock_code: 股票代码
+        stock_name: 股票名称
+        start_date: 开始日期
+        end_date: 结束日期
+        config: 配置字典
+        csv_dir: CSV文件保存目录
+        
+    Returns:
+        tuple: (stock_code, success, data)
+    """
+    try:
+        # 获取股票K线数据
+        stock_data = fetch_stock_data(stock_code, start_date, end_date, config)
+        
+        if stock_data is not None and not stock_data.empty:
+            # 保存到CSV文件
+            csv_file = f"{csv_dir}{stock_code}_history_k_data.csv"
+            save_to_csv(stock_data, csv_file)
+            
+            logger.info(f'股票 {stock_code}({stock_name}) 数据获取成功，共 {len(stock_data)} 条记录')
+            return (stock_code, True, stock_data)
+        else:
+            logger.warning(f'未获取到股票 {stock_code}({stock_name}) 的有效数据')
+            return (stock_code, False, None)
+    except Exception as e:
+        logger.error(f'处理股票 {stock_code}({stock_name}) 时发生异常: {str(e)}', exc_info=True)
+        return (stock_code, False, None)
+
+
 def main():
     """
     主函数，实现自动化股票数据获取流程
@@ -440,42 +458,79 @@ def main():
             stock_codes=stock_df['code'].tolist()
         )
         
-        for index, stock in stock_df.iterrows():
-            stock_code = stock['code']
-            stock_name = stock['name']
-            
-            logger.info(f'处理进度: {index+1}/{total_stocks} - 股票: {stock_code}({stock_name})')
-            
-            try:
-                # 获取股票K线数据
-                stock_data = fetch_stock_data(stock_code, start_date, end_date, config)
-                
-                if stock_data is not None and not stock_data.empty:
-                    # 保存到CSV文件
-                    csv_file = f"{csv_dir}{stock_code}_history_k_data.csv"
-                    save_to_csv(stock_data, csv_file)
-                    
-                    # 数据写入数据库
-                    logger.debug(f'开始将股票 {stock_code} 数据写入数据库')
-                    db_manager.write_dataframe(stock_data, 'history_k_data', if_exists='append')
-                    logger.debug(f'股票 {stock_code} 数据写入数据库成功')
-                    
-                    success_count += 1
-                else:
-                    logger.warning(f'未获取到股票 {stock_code}({stock_name}) 的有效数据')
-                    failure_count += 1
-            except Exception as e:
-                logger.error(f'处理股票 {stock_code}({stock_name}) 时发生异常: {str(e)}', exc_info=True)
-                failure_count += 1
-            
-            # 更新进度
-            progress = (index + 1) / total_stocks * 100
-            status_manager.update_progress(progress, total_stocks, success_count, failure_count)
-            
-            # 添加请求间隔，避免请求过于频繁
-            time.sleep(config['concurrency']['request_interval'])
+        # 7. 登录baostock系统（全局登录一次）
+        logger.info('登录baostock系统')
+        lg = bs.login()
+        if lg.error_code != '0':
+            logger.error(f'baostock登录失败: {lg.error_msg}')
+            return
         
-        # 7. 输出统计信息
+        # 8. 使用多线程并行处理股票数据
+        thread_count = config['concurrency']['thread_count']
+        logger.info(f'使用 {thread_count} 个线程并行处理股票数据')
+        
+        # 用于批量写入数据库的数据列表
+        batch_data = []
+        batch_size = config['update']['batch_size']
+        
+        with ThreadPoolExecutor(max_workers=thread_count) as executor:
+            # 提交所有任务
+            future_to_stock = {}
+            for index, stock in stock_df.iterrows():
+                future = executor.submit(
+                    process_single_stock,
+                    stock['code'],
+                    stock['name'],
+                    start_date,
+                    end_date,
+                    config,
+                    csv_dir
+                )
+                future_to_stock[future] = (stock['code'], stock['name'])
+            
+            # 处理完成的任务
+            for future in as_completed(future_to_stock):
+                stock_code, stock_name = future_to_stock[future]
+                try:
+                    result = future.result()
+                    if result[1]:
+                        success_count += 1
+                        # 将成功获取的数据添加到批量列表
+                        batch_data.append(result[2])
+                        
+                        # 当批量数据达到指定大小时，写入数据库
+                        if len(batch_data) >= batch_size:
+                            logger.info(f'批量写入数据库，共 {len(batch_data)} 个股票数据')
+                            # 合并所有数据
+                            combined_df = pd.concat(batch_data, ignore_index=True)
+                            db_manager.write_dataframe(combined_df, 'history_k_data', if_exists='append')
+                            # 清空批量数据列表
+                            batch_data = []
+                    else:
+                        failure_count += 1
+                    
+                    # 更新进度
+                    progress = (success_count + failure_count) / total_stocks * 100
+                    status_manager.update_progress(progress, total_stocks, success_count, failure_count)
+                except Exception as e:
+                    logger.error(f'处理股票 {stock_code}({stock_name}) 时发生异常: {str(e)}', exc_info=True)
+                    failure_count += 1
+                    
+                    # 更新进度
+                    progress = (success_count + failure_count) / total_stocks * 100
+                    status_manager.update_progress(progress, total_stocks, success_count, failure_count)
+        
+        # 处理剩余的批量数据
+        if batch_data:
+            logger.info(f'批量写入剩余数据，共 {len(batch_data)} 个股票数据')
+            combined_df = pd.concat(batch_data, ignore_index=True)
+            db_manager.write_dataframe(combined_df, 'history_k_data', if_exists='append')
+        
+        # 9. 登出baostock系统
+        bs.logout()
+        logger.info('baostock系统已登出')
+        
+        # 10. 输出统计信息
         logger.info('===== 数据获取统计 =====')
         logger.info(f'总股票数: {total_stocks}')
         logger.info(f'成功获取: {success_count}')
@@ -501,6 +556,11 @@ def main():
             message=str(e),
             duration=str(duration)
         )
+        # 确保登出baostock系统
+        try:
+            bs.logout()
+        except:
+            pass
     finally:
         # 关闭数据库连接
         try:

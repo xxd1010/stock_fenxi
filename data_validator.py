@@ -59,7 +59,7 @@ class DataValidator:
         errors = []
         is_valid = True
         
-        logger.info(f'开始验证股票 {stock_code} 的数据，共 {len(df)} 条记录')
+        logger.debug(f'开始验证股票 {stock_code} 的数据，共 {len(df)} 条记录')
         
         # 1. 检查数据是否为空
         if df is None or df.empty:
@@ -107,7 +107,7 @@ class DataValidator:
             errors.extend(continuity_errors)
             is_valid = False
         
-        logger.info(f'股票 {stock_code} 数据校验完成，结果: {"有效" if is_valid else "无效"}')
+        logger.debug(f'股票 {stock_code} 数据校验完成，结果: {"有效" if is_valid else "无效"}')
         if not is_valid:
             logger.warning(f'股票 {stock_code} 数据校验失败，错误: {errors}')
         
@@ -339,7 +339,7 @@ class DataValidator:
         if df is None or df.empty:
             return df
         
-        logger.info(f'开始清理数据，共 {len(df)} 条记录')
+        logger.debug(f'开始清理数据，共 {len(df)} 条记录')
         
         # 1. 移除重复行
         df = df.drop_duplicates()
@@ -363,7 +363,7 @@ class DataValidator:
             if field in df.columns:
                 df[field] = pd.to_datetime(df[field], errors='coerce')
         
-        logger.info(f'数据清理完成，剩余 {len(df)} 条记录')
+        logger.debug(f'数据清理完成，剩余 {len(df)} 条记录')
         
         return df
 
