@@ -1,0 +1,38 @@
+{
+  "data_source": {
+    "type": "baostock",
+    "login_params": {
+      "user_id": "anonymous",
+      "password": "123456"
+    }
+  },
+  "data_fetch": {
+    "start_date": "2000-01-01",
+    "end_date": "today",
+    "retry_count": 3,
+    "retry_interval": 5,
+    "frequency": "d",
+    "adjustflag": "3"
+  },
+  "concurrency": {
+    "thread_count": 5,
+    "request_interval": 1
+  },
+  "output": {
+    "stock_list_format": "csv",
+    "stock_list_path": "./",
+    "kline_data_format": "csv",
+    "kline_data_path": "D:/",
+    "database_path": "stock_data.db"
+  },
+  "logging": {
+    "log_level": "INFO",
+    "log_file": "logs/stock_fetcher.log",
+    "max_bytes": 5242880,
+    "backup_count": 3
+  },
+  "test_mode": {
+    "enabled": true,
+    "max_stocks": 5
+  }
+}
