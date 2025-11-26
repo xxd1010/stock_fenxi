@@ -1,0 +1,43 @@
+# 数据库文件
+*.db
+
+# CSV文件
+*.csv
+
+# 日志文件
+logs/
+
+# 缓存文件
+__pycache__/
+
+# 配置文件
+stock_config.txt
+
+# 临时文件
+*.tmp
+*.temp
+
+# IDE相关文件
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# Python相关文件
+*.pyc
+*.pyo
+*.pyd
+
+# 测试文件
+.test/
+
+# 输出目录
+output/
+
+# 历史数据文件
+history_k_data.csv
+D:/*.csv
