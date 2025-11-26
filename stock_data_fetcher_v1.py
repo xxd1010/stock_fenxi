@@ -7,6 +7,10 @@ import datetime
 import sqlite_db_manager as spl
 # 导入日志工具
 from log_utils import setup_logger, get_logger
+# 导入数据校验器
+from data_validator import DataValidator
+# 导入更新状态管理器
+from update_status import UpdateStatusManager
 
 # 配置日志
 log_config = {
@@ -204,6 +208,10 @@ def fetch_stock_data(code, start_date, end_date, config=None):
     retry_interval = config['data_fetch']['retry_interval'] if config else 5
     frequency = config['data_fetch']['frequency'] if config else 'd'
     adjustflag = config['data_fetch']['adjustflag'] if config else '3'
+    validation_enabled = config['update']['validation_enabled'] if config and 'update' in config else False
+    
+    # 创建数据校验器
+    validator = DataValidator()
     
     for attempt in range(retry_count):
         try:
@@ -247,6 +255,24 @@ def fetch_stock_data(code, start_date, end_date, config=None):
             
             result = pd.DataFrame(data_list, columns=rs.fields)
             logger.info(f'成功获取股票 {code} 历史数据，共 {len(result)} 条记录')
+            
+            # 数据校验
+            if validation_enabled:
+                logger.info(f'开始验证股票 {code} 的数据')
+                validation_result = validator.validate_dataframe(result, code)
+                
+                if not validation_result['is_valid']:
+                    # 尝试清理数据
+                    logger.info(f'股票 {code} 数据验证失败，尝试清理数据')
+                    result = validator.clean_dataframe(result)
+                    
+                    # 再次验证
+                    validation_result = validator.validate_dataframe(result, code)
+                    if not validation_result['is_valid']:
+                        logger.error(f'股票 {code} 数据验证失败，已清理后仍无效，跳过该股票')
+                        return None
+                
+                logger.info(f'股票 {code} 数据验证通过')
             
             return result
         except Exception as e:
@@ -358,6 +384,9 @@ def main():
     logger.info('===== 股票数据获取程序启动 =====')
     start_time = datetime.datetime.now()
     
+    # 创建更新状态管理器
+    status_manager = UpdateStatusManager()
+    
     try:
         # 1. 加载配置文件
         config = load_config()
@@ -403,6 +432,14 @@ def main():
         
         logger.info(f'开始批量获取K线数据，共 {total_stocks} 只股票，日期范围: {start_date} 至 {end_date}')
         
+        # 记录更新开始状态
+        status_manager.start_update(
+            update_type=config['update']['update_type'],
+            start_date=start_date,
+            end_date=end_date,
+            stock_codes=stock_df['code'].tolist()
+        )
+        
         for index, stock in stock_df.iterrows():
             stock_code = stock['code']
             stock_name = stock['name']
@@ -431,6 +468,10 @@ def main():
                 logger.error(f'处理股票 {stock_code}({stock_name}) 时发生异常: {str(e)}', exc_info=True)
                 failure_count += 1
             
+            # 更新进度
+            progress = (index + 1) / total_stocks * 100
+            status_manager.update_progress(progress, total_stocks, success_count, failure_count)
+            
             # 添加请求间隔，避免请求过于频繁
             time.sleep(config['concurrency']['request_interval'])
         
@@ -441,8 +482,25 @@ def main():
         logger.info(f'获取失败: {failure_count}')
         logger.info(f'成功率: {success_count/total_stocks*100:.2f}%')
         
+        # 记录更新完成状态
+        end_time = datetime.datetime.now()
+        duration = end_time - start_time
+        status_manager.finish_update(
+            status='success',
+            message='数据获取完成',
+            duration=str(duration)
+        )
+        
     except Exception as e:
         logger.error(f'程序执行出错: {str(e)}', exc_info=True)
+        # 记录更新失败状态
+        end_time = datetime.datetime.now()
+        duration = end_time - start_time
+        status_manager.finish_update(
+            status='failed',
+            message=str(e),
+            duration=str(duration)
+        )
     finally:
         # 关闭数据库连接
         try:

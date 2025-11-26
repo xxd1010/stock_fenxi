@@ -60,8 +60,27 @@
   "// 测试模式配置": "",
   "test_mode": {
     "// 是否启用测试模式": "true=只处理少量股票，false=处理所有股票",
-    "enabled": true,
+    "enabled": false,
     "// 测试模式下处理的最大股票数量": "",
     "max_stocks": 5
+  },
+  "// 更新管理配置": "",
+  "update": {
+    "// 是否启用自动更新": "",
+    "auto_update_enabled": true,
+    "// 更新频率": "daily=每天, weekly=每周, monthly=每月",
+    "frequency": "daily",
+    "// 更新时间": "格式HH:MM",
+    "update_time": "09:30",
+    "// 更新类型": "full=全量更新, incremental=增量更新, partial=部分更新",
+    "update_type": "incremental",
+    "// 增量更新天数": "",
+    "incremental_days": 7,
+    "// 是否启用数据校验": "",
+    "validation_enabled": true,
+    "// 批量处理大小": "每次处理的股票数量",
+    "batch_size": 100,
+    "// 超时时间": "单位秒",
+    "timeout": 3600
   }
 }
