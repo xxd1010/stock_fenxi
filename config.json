@@ -1,38 +1,67 @@
 {
+  "// 数据源配置": "",
   "data_source": {
+    "// 数据源类型": "当前仅支持baostock",
     "type": "baostock",
+    "// 登录参数": "",
     "login_params": {
+      "// 用户名": "baostock默认匿名用户",
       "user_id": "anonymous",
+      "// 密码": "baostock默认密码",
       "password": "123456"
     }
   },
+  "// 数据获取配置": "",
   "data_fetch": {
+    "// 开始日期": "K线数据开始日期，格式YYYY-MM-DD",
     "start_date": "2000-01-01",
+    "// 结束日期": "K线数据结束日期，可设置为'today'表示当天",
     "end_date": "today",
+    "// 重试次数": "网络请求失败时的最大重试次数",
     "retry_count": 3,
+    "// 重试间隔": "两次重试之间的间隔时间（秒）",
     "retry_interval": 5,
+    "// 数据频率": "d=日线，w=周线，m=月线",
     "frequency": "d",
+    "// 复权方式": "3=不复权，2=前复权，1=后复权",
     "adjustflag": "3"
   },
+  "// 并发配置": "",
   "concurrency": {
+    "// 线程数": "并发处理的线程数量",
     "thread_count": 5,
+    "// 请求间隔": "两次请求之间的间隔时间（秒），避免请求过于频繁",
     "request_interval": 1
   },
+  "// 输出配置": "",
   "output": {
+    "// 股票列表格式": "支持csv、json、txt",
     "stock_list_format": "csv",
+    "// 股票列表保存路径": "",
     "stock_list_path": "./",
+    "// K线数据格式": "目前仅支持csv",
     "kline_data_format": "csv",
+    "// K线数据保存路径": "",
     "kline_data_path": "D:/",
+    "// 数据库路径": "SQLite数据库文件路径",
     "database_path": "stock_data.db"
   },
+  "// 日志配置": "",
   "logging": {
+    "// 日志级别": "DEBUG, INFO, WARNING, ERROR, CRITICAL",
     "log_level": "INFO",
+    "// 日志文件路径": "",
     "log_file": "logs/stock_fetcher.log",
+    "// 日志文件最大大小": "单位字节，5242880=5MB",
     "max_bytes": 5242880,
+    "// 日志文件备份数量": "",
     "backup_count": 3
   },
+  "// 测试模式配置": "",
   "test_mode": {
+    "// 是否启用测试模式": "true=只处理少量股票，false=处理所有股票",
     "enabled": true,
+    "// 测试模式下处理的最大股票数量": "",
     "max_stocks": 5
   }
 }
