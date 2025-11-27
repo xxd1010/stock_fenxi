@@ -1,30 +1,28 @@
 {
-  "last_update": null,
-  "last_update_time": null,
-  "last_update_status": "running",
-  "update_history": [],
-  "current_update": {
-    "start_time": "2025-11-26 14:38:08",
-    "update_type": "incremental",
-    "start_date": "2000-01-01",
-    "end_date": "2025-11-26",
-    "stock_codes": [
-      "sh.000001",
-      "sh.000002",
-      "sh.000003",
-      "sh.000004",
-      "sh.000005",
-      "sh.000006",
-      "sh.000007",
-      "sh.000008",
-      "sh.000009",
-      "sh.000010"
-    ]
-  },
-  "progress": 60.0,
-  "total_stocks": 10,
+  "last_update": "2025-11-26",
+  "last_update_time": "2025-11-26 20:32:04",
+  "last_update_status": "success",
+  "update_history": [
+    {
+      "start_time": "2025-11-26 20:25:38",
+      "end_time": "2025-11-26 20:32:04",
+      "update_type": "incremental",
+      "start_date": "2000-01-01",
+      "end_date": "2025-11-26",
+      "status": "success",
+      "message": "数据获取完成",
+      "duration": "0:06:43.019789",
+      "total_stocks": 5667,
+      "updated_stocks": 0,
+      "failed_stocks": 5667,
+      "progress": 100.0
+    }
+  ],
+  "current_update": null,
+  "progress": 100.0,
+  "total_stocks": 5667,
   "updated_stocks": 0,
-  "failed_stocks": 6,
+  "failed_stocks": 5667,
   "update_config": {
     "update_type": "incremental",
     "start_date": null,

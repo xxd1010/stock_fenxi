@@ -1,14 +1,31 @@
 {
   "// 数据源配置": "",
   "data_source": {
-    "// 数据源类型": "当前仅支持baostock",
-    "type": "baostock",
+    "// 数据源类型": "支持baostock和akshare",
+    "type": "akshare",
     "// 登录参数": "",
     "login_params": {
       "// 用户名": "baostock默认匿名用户",
       "user_id": "anonymous",
       "// 密码": "baostock默认密码",
       "password": "123456"
+    },
+    "// akshare配置": "",
+    "akshare": {
+      "// 数据源名称": "akshare数据源名称，如stock_zh_a_hist",
+      "source_name": "stock_zh_a_hist",
+      "// 数据频率": "日k线: daily, 周k线: weekly, 月k线: monthly",
+      "frequency": "daily",
+      "// 复权类型": "不复权: qfq, 前复权: hfq, 后复权: qfq",
+      "adjust": "qfq",
+      "// 速率限制": "每秒最大请求数",
+      "rate_limit": 5,
+      "// 超时时间": "请求超时时间（秒）",
+      "timeout": 30,
+      "// 缓存启用": "是否启用数据缓存",
+      "cache_enabled": true,
+      "// 缓存过期时间": "缓存过期时间（小时）",
+      "cache_expire_hours": 24
     }
   },
   "// 数据获取配置": "",
@@ -29,9 +46,13 @@
   "// 并发配置": "",
   "concurrency": {
     "// 线程数": "并发处理的线程数量",
-    "thread_count": 5,
+    "thread_count": 3,
     "// 请求间隔": "两次请求之间的间隔时间（秒），避免请求过于频繁",
-    "request_interval": 1
+    "request_interval": 2,
+    "// 最大并发请求数": "同时发送的最大请求数量",
+    "max_concurrent_requests": 3,
+    "// 批量处理大小": "每次批量处理的股票数量",
+    "batch_size": 10
   },
   "// 输出配置": "",
   "output": {
