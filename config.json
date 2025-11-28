@@ -85,6 +85,104 @@
     "// 测试模式下处理的最大股票数量": "",
     "max_stocks": 10
   },
+  "// 分析配置": "",
+  "analysis": {
+    "// 分析模式": "traditional=传统分析, llm=大模型分析, hybrid=混合分析",
+    "mode": "traditional",
+    "// 技术指标配置": "",
+    "technical_indicators": {
+      "// 均线周期": "",
+      "ma_periods": [5, 10, 20, 60, 120, 250],
+      "// MACD参数": "",
+      "macd": {
+        "fast": 12,
+        "slow": 26,
+        "signal": 9
+      },
+      "// RSI周期": "",
+      "rsi_periods": [6, 12, 24],
+      "// KDJ参数": "",
+      "kdj": {
+        "length": 9,
+        "signal": 3
+      },
+      "// 布林带参数": "",
+      "bollinger": {
+        "length": 20,
+        "std": 2
+      },
+      "// 成交量均线周期": "",
+      "volume_ma_periods": [5, 10, 20]
+    },
+    "// 大模型配置": "",
+    "llm": {
+      "// 模型提供商": "baidu=百度文心一言, alibaba=通义千问, tencent=腾讯混元, bytedance=豆包, huawei=华为盘古, zhipu=智谱清言, sensecore=商汤日日新, openai=OpenAI, anthropic=Anthropic",
+      "provider": "openai",
+      "// 模型名称": "",
+      "model_name": "gpt-4",
+      "// API密钥配置": "",
+      "api_keys": {
+        "baidu": {
+          "api_key": "",
+          "secret_key": ""
+        },
+        "alibaba": {
+          "api_key": ""
+        },
+        "tencent": {
+          "secret_id": "",
+          "secret_key": ""
+        },
+        "bytedance": {
+          "api_key": ""
+        },
+        "huawei": {
+          "api_key": "",
+          "endpoint": ""
+        },
+        "zhipu": {
+          "api_key": ""
+        },
+        "sensecore": {
+          "api_key": ""
+        },
+        "openai": {
+          "api_key": ""
+        },
+        "anthropic": {
+          "api_key": ""
+        }
+      },
+      "// 温度参数": "",
+      "temperature": 0.1,
+      "// 最大 tokens": "",
+      "max_tokens": 1000,
+      "// 多模型对比": "是否启用多模型对比分析",
+      "multi_model_comparison": false,
+      "// 对比模型列表": "",
+      "comparison_models": ["ERNIE-Bot-4", "qwen-turbo", "gpt-4"]
+    },
+    "// 抽样配置": "",
+    "sampling": {
+      "// 抽样模式": "random=随机抽样, stratified=分层抽样",
+      "mode": "random",
+      "// 抽样比例": "",
+      "ratio": 0.1,
+      "// 最大样本数": "",
+      "max_samples": 100,
+      "// 是否启用抽样": "",
+      "enabled": false
+    },
+    "// 报告配置": "",
+    "report": {
+      "// 报告格式": "markdown=Markdown, html=HTML",
+      "format": "markdown",
+      "// 报告保存路径": "",
+      "save_path": "reports/",
+      "// 是否生成图表": "",
+      "generate_charts": true
+    }
+  },
   "// 更新管理配置": "",
   "update": {
     "// 是否启用自动更新": "",
