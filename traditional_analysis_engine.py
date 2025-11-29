@@ -54,7 +54,7 @@ class TraditionalAnalysisEngine:
             self.logger.error(f"分析MACD指标失败: {str(e)}")
             return 'hold'
     
-    def analyze_rsi(self, df: pd.DataFrame, period: int = 14) -> str:
+    def analyze_rsi(self, df: pd.DataFrame, period: int = 12) -> str:
         """
         分析RSI指标，生成信号
         

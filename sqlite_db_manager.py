@@ -385,16 +385,19 @@ class SQLiteDBManager:
             self.logger.error(f'将DataFrame写入表 {table_name} 失败: {str(e)}')
             raise
     
-    def read_dataframe(self, table_name: str, columns: Optional[List[str]] = None, 
-                      where_clause: str = '', where_params: Optional[Tuple] = None) -> 'pd.DataFrame':
+    def read_dataframe(self, table_name: str = None, columns: Optional[List[str]] = None, 
+                      where_clause: str = '', where_params: Optional[Tuple] = None, 
+                      query: str = None, params: Optional[Tuple] = None) -> 'pd.DataFrame':
         """
         从数据库表读取数据到pandas DataFrame
         
         Args:
-            table_name: 表名
-            columns: 要读取的列列表，默认为所有列
-            where_clause: WHERE子句
-            where_params: WHERE子句的参数
+            table_name: 表名（如果提供query参数，则忽略此参数）
+            columns: 要读取的列列表，默认为所有列（如果提供query参数，则忽略此参数）
+            where_clause: WHERE子句（如果提供query参数，则忽略此参数）
+            where_params: WHERE子句的参数（如果提供params参数，则忽略此参数）
+            query: 完整的SQL查询语句（可选，优先级高于table_name等参数）
+            params: 查询参数（可选，优先级高于where_params）
             
         Returns:
             包含查询结果的pandas DataFrame
@@ -406,23 +409,31 @@ class SQLiteDBManager:
             if not self.conn:
                 self.connect()
                 
-            # 构建查询语句
-            if columns:
-                columns_str = ', '.join(columns)
+            # 如果提供了完整的查询语句，则使用该语句
+            if query:
+                # 使用提供的查询语句和参数
+                final_query = query
+                final_params = params
             else:
-                columns_str = '*'
+                # 构建查询语句
+                if columns:
+                    columns_str = ', '.join(columns)
+                else:
+                    columns_str = '*'
+                    
+                final_query = f'SELECT {columns_str} FROM {table_name}'
                 
-            query = f'SELECT {columns_str} FROM {table_name}'
+                if where_clause:
+                    final_query += f' WHERE {where_clause}'
+                    
+                final_params = where_params
             
-            if where_clause:
-                query += f' WHERE {where_clause}'
-                
             # 使用pandas的read_sql方法读取数据
-            df = pd.read_sql(query, self.conn, params=where_params)
-            self.logger.info(f'成功从表 {table_name} 读取数据到DataFrame')
+            df = pd.read_sql(final_query, self.conn, params=final_params)
+            self.logger.info(f'成功执行查询并读取数据到DataFrame')
             return df
         except Exception as e:
-            self.logger.error(f'从表 {table_name} 读取数据失败: {str(e)}')
+            self.logger.error(f'从数据库读取数据失败: {str(e)}')
             raise
 
 

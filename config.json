@@ -31,7 +31,7 @@
   "// 数据获取配置": "",
   "data_fetch": {
     "// 开始日期": "K线数据开始日期，格式YYYY-MM-DD",
-    "start_date": "2000-01-01",
+    "start_date": "2023-01-01",
     "// 结束日期": "K线数据结束日期，可设置为'today'表示当天",
     "end_date": "today",
     "// 重试次数": "网络请求失败时的最大重试次数",
@@ -63,7 +63,7 @@
     "// K线数据格式": "目前仅支持csv",
     "kline_data_format": "csv",
     "// K线数据保存路径": "",
-    "kline_data_path": "D:/",
+    "kline_data_path": "D:/stock_data/",
     "// 数据库路径": "SQLite数据库文件路径",
     "database_path": "stock_data.db"
   },

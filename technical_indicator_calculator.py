@@ -105,14 +105,12 @@ class TechnicalIndicatorCalculator:
         try:
             result_df = df.copy()
             
+            # 只计算一次价格变化、涨跌
+            delta = result_df['close'].diff()
+            gain = delta.where(delta > 0, 0)
+            loss = -delta.where(delta < 0, 0)
+            
             for period in periods:
-                # 计算价格变化
-                delta = result_df['close'].diff()
-                
-                # 分离涨跌
-                gain = delta.where(delta > 0, 0)
-                loss = -delta.where(delta < 0, 0)
-                
                 # 计算平均涨跌
                 avg_gain = gain.rolling(window=period).mean()
                 avg_loss = loss.rolling(window=period).mean()

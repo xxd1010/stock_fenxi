@@ -118,7 +118,7 @@ class StockDataReader:
                 query += f" LIMIT {limit}"
             
             # 执行查询
-            df = self.db_manager.read_dataframe(query, params=params)
+            df = self.db_manager.read_dataframe(query=query, params=params)
             
             # 如果有数据，按日期升序排序
             if not df.empty:

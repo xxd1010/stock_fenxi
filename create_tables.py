@@ -27,6 +27,40 @@ def create_tables(db_path: str = 'stock_data.db'):
         db_manager.connect()
         logger.info(f"成功连接到数据库: {db_path}")
         
+        # 创建history_k_data表
+        logger.info("开始创建history_k_data表...")
+        db_manager.create_table(
+            'history_k_data',
+            {
+                'date': 'TEXT',
+                'code': 'TEXT',
+                'open': 'REAL',
+                'high': 'REAL',
+                'low': 'REAL',
+                'close': 'REAL',
+                'preclose': 'REAL',
+                'volume': 'REAL',
+                'amount': 'REAL',
+                'adjustflag': 'TEXT',
+                'turn': 'REAL',
+                'tradestatus': 'TEXT',
+                'pctChg': 'REAL',
+                'peTTM': 'REAL',
+                'pbMRQ': 'REAL',
+                'psTTM': 'REAL',
+                'pcfNcfTTM': 'REAL',
+                'isST': 'TEXT'
+            }
+        )
+        # 添加索引
+        db_manager.execute_update(
+            "CREATE INDEX IF NOT EXISTS idx_history_k_data_code ON history_k_data(code)"
+        )
+        db_manager.execute_update(
+            "CREATE INDEX IF NOT EXISTS idx_history_k_data_date ON history_k_data(date)"
+        )
+        logger.info("history_k_data表创建完成")
+        
         # 创建technical_indicators表
         logger.info("开始创建technical_indicators表...")
         db_manager.create_table(
